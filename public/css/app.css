@@ -25,3 +25,10 @@
 .red{
 	color:red;
 }
+.buttons {
+	display:inline-flex;
+}
+.buttons .btn {
+	width: 100px;
+	margin: 10px;
+}

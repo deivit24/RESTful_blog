@@ -3,12 +3,14 @@
 const express =require("express"),
 	  bodyParser = require("body-parser"),
 	  methodOverride = require("method-override"),
+	  expressSanitizer = require("express-sanitizer"),
 	  mongoose = require("mongoose"),
 	  app = express()
 
 // using body  parser
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(expressSanitizer());
 
 // setting view engine for ejs and custom style sheet
 
@@ -17,7 +19,7 @@ app.use(express.static("public"));
 app.use(methodOverride("_method"));
 
 // Mongoose set up
-
+mongoose.set('useFindAndModify', false);
 mongoose.connect('mongodb://localhost:27017/restful_blog_app', {useNewUrlParser: true});
 
 // Set up Schema/Model Config
@@ -61,7 +63,11 @@ app.get("/blogs/new", (req, res) => {
 
 // CREATE ROUTE
 app.post("/blogs", (req, res) => {
+
+	req.body.blog.body = req.sanitize(req.body.blog.body);
+	
 	let data = req.body.blog;
+	
 	Blog.create(data, (err, newBlog) => {
 		if(err) {
 			res.render('new');
@@ -100,6 +106,7 @@ app.get("/blogs/:id/edit", (req, res) => {
 
 // UPDATE ROUTE
 app.put("/blogs/:id", (req, res) => {
+	req.body.blog.body = req.sanitize(req.body.blog.body);
 	let id = req.params.id;
 	Blog.findByIdAndUpdate(id, req.body.blog, (err, updatedBlog) => {
 		if(err) {
@@ -123,15 +130,7 @@ app.delete("/blogs/:id", (req, res) => {
 	})
 	
 })
-function myFunction() {
-   var x;
-     if (confirm("Are you sure?") == true) {
-         x = "You pressed OK!";
-     } else {
-         x = "You pressed Cancel!";
-     }
-     return x; 
-}
+
 app.listen(3000, () => {
 	console.log("server is running");
 });
